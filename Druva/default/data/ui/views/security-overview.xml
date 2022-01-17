@@ -1,0 +1,138 @@
+<form version="1.1">
+  <label>Security Overview</label>
+  <init>
+    <set token="severitytkn"></set>
+    <set token="typetkn"></set>
+    <set token="srctkn"></set>
+  </init>
+  <fieldset submitButton="false">
+    <input type="time" token="field1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Backup/Restore Locations</title>
+      <input type="dropdown" token="etypetkn">
+        <label></label>
+        <choice value="event_type=Backup">Backup</choice>
+        <choice value="event_type=Restore">Restore</choice>
+        <choice value="event_type=Backup OR event_type=Restore">All</choice>
+        <default>event_type=Backup OR event_type=Restore</default>
+        <initialValue>event_type=Backup OR event_type=Restore</initialValue>
+      </input>
+      <map>
+        <search>
+          <query>`druva_get_index` ip!="" $etypetkn$ | iplocation ip  | eval event_type=Country.":".event_type | geostats latfield=lat longfield=lon count by event_type</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="mapping.type">marker</option>
+        <option name="refresh.display">progressbar</option>
+      </map>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Failure Events</title>
+      <chart>
+        <search>
+          <query>`druva_get_index` NOT event_type IN (Backup, Restore, "Client Upgrade") eventState="Failed" | timechart count by event_type</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Unusual Data Activity</title>
+      <chart>
+        <search>
+          <query>`druva_get_index` eventDetails="*Alert:Unusual Data Activity*" | rex field=eventDetails "Anomaly\sdetected:(?&lt;details&gt;[\S\s]+?),\sAffected\sSnapshot" | timechart count as "Count Of Unusual Data Activity" by details</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Time</option>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Alert Counts by State</title>
+      <chart>
+        <search>
+          <query>`druva_get_index` event_type=Alert | stats count by eventState</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top 15 Users by Restore Activity</title>
+      <chart>
+        <search>
+          <query>`druva_get_index` event_type="Restore" | chart count(inSyncUserName) as "Count Of Restore" by inSyncUserName | sort 0 - "Count Of Restore" | head 15</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.axisTitleY.text">No of Restores</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisEnd</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Alert Details</title>
+      <input type="dropdown" token="event_type">
+        <label></label>
+        <choice value="*">All</choice>
+        <choice value="-">General</choice>
+        <fieldForLabel>details</fieldForLabel>
+        <fieldForValue>details</fieldForValue>
+        <search>
+          <query>`druva_get_index` event_type=Alert | rex field=eventDetails "Alert:(?&lt;details&gt;[\S\s]+?),\sAlert\sDescription" | dedup details | search details!="" details!="-" | table details</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <default>*</default>
+        <initialValue>*</initialValue>
+      </input>
+      <table>
+        <search>
+          <query>`druva_get_index` eventID!="" event_type="Alert" eventDetails="*Alert:$event_type$*" | table eventID, eventState, ip, profileName,eventDetails, clientOS, clientVersion | eval ip=if(IP="","-",ip) | rename event_type as eventType</query>
+          <earliest>$field1.earliest$</earliest>
+          <latest>$field1.latest$</latest>
+        </search>
+        <option name="drilldown">cell</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>

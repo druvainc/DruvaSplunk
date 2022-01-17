@@ -1,0 +1,13 @@
+<panel>
+  <title>WebDAV Login State</title>
+  <chart>
+    <search>
+      <query>`druva_get_index` event_type="WebDAV Login" | stats count by eventState</query>
+      <earliest>$earliest$</earliest>
+      <latest>$latest$</latest>
+    </search>
+    <option name="charting.chart">pie</option>
+    <option name="charting.drilldown">all</option>
+    <option name="refresh.display">progressbar</option>
+  </chart>
+</panel>

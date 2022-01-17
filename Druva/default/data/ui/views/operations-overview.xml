@@ -1,0 +1,161 @@
+<form version="1.1">
+  <label>Operations Overview</label>
+  <fieldset submitButton="false">
+    <input type="time">
+      <label>Time</label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Unique No. of Users</title>
+      <single>
+        <search>
+          <query>`druva_get_index` | stats dc(inSyncUserID) as "No. Of Users"</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="colorMode">none</option>
+        <option name="drilldown">all</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">0</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Unique No. of Devices</title>
+      <chart>
+        <search>
+          <query>`druva_get_index` clientOS!="" NOT clientOS IN ("G Suite Gmail","G Suite Google Drive","G Suite Team Drive","Office 365 SharePoint","Office 365 Exchange Online","Office 365 OneDrive","Box Box") | stats dc(inSyncDataSourceID) as "No. Of Devices" by clientOS</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Unique No. of Cloud App Devices</title>
+      <chart>
+        <search>
+          <query>`druva_get_index` clientOS IN ("G Suite Gmail","G Suite Google Drive","G Suite Team Drive","Office 365 SharePoint","Office 365 Exchange Online","Office 365 OneDrive","Box Box") | stats dc(inSyncDataSourceID) as "No. Of Cloud Apps" by clientOS</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Backup Failure Trends by OS</title>
+      <chart>
+        <search>
+          <query>`druva_get_index` event_type="Backup" ip!="" eventState="Failed" | timechart count by clientOS</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Top 15 Users by Number of Devices</title>
+      <chart>
+        <search>
+          <query>`druva_get_index` clientOS!="" NOT clientOS IN ("G Suite Gmail","G Suite Google Drive","G Suite Team Drive","Office 365 SharePoint","Office 365 Exchange Online","Office 365 OneDrive","Box Box")  | chart dc(inSyncDataSourceID) as "Count Of Data Source" by inSyncUserName | sort 0 - "Count Of Data Source" | head 15</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Username</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Number of Devices</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisEnd</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top 15 Users by Number of Cloud Apps</title>
+      <chart>
+        <search>
+          <query>`druva_get_index` clientOS IN ("G Suite Gmail","G Suite Google Drive","G Suite Team Drive","Office 365 SharePoint","Office 365 Exchange Online","Office 365 OneDrive","Box Box")  | chart dc(inSyncDataSourceID) as "Count Of Data Source" by inSyncUserName | sort 0 - "Count Of Data Source" | head 15</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Username</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Number of Devices</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisEnd</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Devices/Apps Added over Time</title>
+      <chart>
+        <search>
+          <query>`druva_get_index` inSyncDataSourceID!="" clientOS!=""  | dedup inSyncDataSourceID | timechart count by clientOS</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.visibility">collapsed</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Event Details</title>
+      <input type="dropdown" token="event_type">
+        <label>Event Types</label>
+        <choice value="*">All</choice>
+        <fieldForLabel>event_type</fieldForLabel>
+        <fieldForValue>event_type</fieldForValue>
+        <search>
+          <query>`druva_get_index` eventID!="" | dedup event_type| table event_type</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <default>*</default>
+      </input>
+      <table>
+        <search>
+          <query>`druva_get_index` eventID!="" event_type=$event_type$ | table eventID, event_type, eventState, ip, profileName,eventDetails, clientOS, clientVersion | eval ip=if(IP="","-",ip) | rename event_type as eventType</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="drilldown">cell</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>

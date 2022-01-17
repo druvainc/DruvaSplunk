@@ -1,0 +1,12 @@
+<panel>
+  <title>Admin Activity</title>
+  <chart>
+    <search>
+      <query>`druva_get_index` eventType="Admin Audit Trail" | eval admin_activity=case(like(eventDetails,"%Administrators%reset the password%"),"reset the password",like(eventDetails,"%Administrators%deleted an administrator%"), "deleted an administrator", like(eventDetails,"%Administrators%created an administrator%"), "created an administrator", 1=1, "Others") | where admin_activity!="Others" | chart count by admin_activity</query>
+      <earliest>$earliest$</earliest>
+      <latest>$latest$</latest>
+    </search>
+    <option name="charting.chart">pie</option>
+    <option name="charting.drilldown">none</option>
+  </chart>
+</panel>

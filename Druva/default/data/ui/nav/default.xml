@@ -1,0 +1,5 @@
+<nav search_view="search" color="#00284c">
+	<view name="security-overview" default="true" />
+	<view name="operations-overview" />	
+	<view name="search" label="Search" />	
+</nav>
